@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickRefund — Pre-Dispute Resolution at the Gateway</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Fraunces:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0b1628;--navy-mid:#101d30;--navy-light:#1a2a45;--steel-blue:#196896;--green:#2BC000;--green-light:#33d600;--green-dark:#24a000;--white:#fff;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-600:#475569;--gray-800:#1e293b;--red:#ef4444;--orange:#f59e0b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--gray-800);line-height:1.6}
+.container{max-width:1140px;margin:0 auto;padding:0 2rem}
+
+/* ─── SITE NAV ─── */
+.site-nav{position:sticky;top:0;z-index:100;background:var(--white);border-bottom:1px solid var(--gray-200);padding:1.2rem 2rem;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.site-nav .logo{display:flex;align-items:center;gap:.5rem;text-decoration:none}
+.site-nav .logo img{height:104px}
+.nav-links{display:flex;align-items:center;gap:1.25rem}
+.nav-links>a,.nav-dropdown-trigger{font-size:1rem;color:var(--gray-600);text-decoration:none;font-weight:500;transition:color .2s;cursor:pointer;background:none;border:none;font-family:inherit;display:inline-flex;align-items:center;gap:.3rem;white-space:nowrap}
+.nav-links>a:hover,.nav-dropdown-trigger:hover{color:var(--navy)}
+.nav-dropdown{position:relative}
+.nav-dropdown-menu{position:absolute;top:calc(100% + 8px);left:-12px;background:var(--white);border:1px solid var(--gray-200);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.1);padding:.5rem 0;min-width:200px;opacity:0;visibility:hidden;transition:opacity .2s,transform .2s;transform:translateY(6px);z-index:200}
+.nav-dropdown:hover .nav-dropdown-menu{opacity:1;visibility:visible;transform:translateY(0)}
+.nav-dropdown-menu a{display:block;padding:.55rem 1.25rem;font-size:.85rem;color:var(--gray-600);text-decoration:none;transition:background .15s,color .15s}
+.nav-dropdown-menu a:hover{background:var(--gray-50);color:var(--navy)}
+.dropdown-arrow{font-size:.6rem;transition:transform .2s}
+.nav-dropdown:hover .dropdown-arrow{transform:rotate(180deg)}
+.btn-demo{background:var(--green);color:var(--white) !important;padding:.6rem 1.5rem;border-radius:50px;font-weight:700;font-size:1rem;transition:all .2s;display:inline-block;text-decoration:none}
+.btn-demo:hover{background:var(--green-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(43,192,0,.3)}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:.5rem;flex-direction:column;gap:5px}
+.hamburger span{display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;transition:all .3s}
+.hamburger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.active span:nth-child(2){opacity:0}
+.hamburger.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+@media(max-width:640px){
+  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:var(--white);flex-direction:column;padding:1.5rem 2rem;border-bottom:1px solid var(--gray-200);box-shadow:0 8px 24px rgba(0,0,0,.08);gap:1rem;align-items:flex-start}
+  .nav-links.nav-open{display:flex}
+  .hamburger{display:flex}
+  .nav-dropdown-menu{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;border:none;padding:0 0 0 1rem}
+  .site-nav .logo img{height:72px}
+  .site-nav{padding:.8rem 1.25rem}
+}
+
+/* ─── HERO ─── */
+.hero{background:linear-gradient(160deg,var(--navy) 0%,#0d2240 50%,var(--navy-mid) 100%);color:var(--white);padding:5rem 2rem 4rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;right:0;width:60%;height:100%;background:radial-gradient(ellipse at 80% 30%,rgba(43,192,0,.08) 0%,transparent 60%)}
+.hero::after{content:'';position:absolute;right:-60px;bottom:-40px;width:350px;height:350px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1920'%3E%3Cpath fill='%23196896' d='M1253.91,714.6l-166.07-3.81,57.62-79.22c-50.42-25.63-107.61-40.04-167.98-40.04-205.9,0-373.03,167.13-373.03,373.24s167.13,373.03,373.03,373.03,373.24-167.13,373.24-373.03c0-96.38-36.65-184.29-96.81-250.17ZM1012.85,1188.03v77.95h-80.71v-70.96c-45.97-2.33-90.03-14.4-115.45-27.11l21.39-98.71c30.29,15.04,69.69,28.6,114.81,28.6,36.01,0,59.31-12.29,59.31-35.38s-20.55-38.98-70.12-57.83c-75.62-29.87-122.65-67.36-122.65-136.42,0-63.55,41.94-115.02,119.05-133.45v-71.17h80.71v64.18c44.48,1.48,76.68,11.23,101.04,22.03l-22.03,95.32c-19.07-8.69-49.36-23.3-97.65-23.3-40.46,0-54.65,15.46-54.65,33.89s19.28,31.99,78.16,56.35c84.94,33.47,114.39,76.05,114.39,138.75,0,67.57-45.33,121.38-125.61,137.27Z'/%3E%3Cpath fill='%232BC000' d='M1585,1175.32c-89.6,258.43-333.63,432.13-607.31,432.13-354.39,0-642.69-288.3-642.69-642.69S623.3,322.08,977.69,322.08c126.67,0,248.9,36.65,354.18,106.34l84.73-115.87,129.85,377.9-399.51-8.9,72.23-98.92c-72.23-45.75-155.48-69.9-241.49-69.9-249.32,0-452.04,202.72-452.04,452.04s202.72,452.04,452.04,452.04c192.55,0,364.13-122.23,427.26-303.97l180.05,62.49Z'/%3E%3C/svg%3E") no-repeat center;background-size:contain;opacity:.04;pointer-events:none}
+.hero .container{position:relative;z-index:1}
+.hero-tabs{display:flex;gap:.5rem;margin-bottom:1.75rem}
+.hero-tab{background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);padding:.5rem 1.25rem;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .25s}
+.hero-tab:hover{border-color:rgba(255,255,255,.4);color:var(--white)}
+.hero-tab.active{background:var(--green);border-color:var(--green);color:var(--white)}
+.hero-label{font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:1.5rem;display:flex;align-items:center;gap:.5rem}
+.hero-label::before{content:'';width:24px;height:1px;background:var(--green)}
+.hero h1{font-family:'Fraunces',serif;font-size:clamp(2.2rem,5vw,3.5rem);font-weight:700;line-height:1.15;max-width:720px;margin-bottom:1.5rem}
+.hero h1 span{color:var(--green)}
+.hero-sub{font-size:1.1rem;color:var(--gray-400);max-width:600px;margin-bottom:2.5rem;line-height:1.7;font-weight:300}
+.hero-cta{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:3rem}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 1.75rem;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;text-decoration:none;transition:all .2s;cursor:pointer;border:none}
+.btn-primary{background:var(--green);color:var(--white)}
+.btn-primary:hover{background:var(--green-light);transform:translateY(-1px);box-shadow:0 6px 20px rgba(43,192,0,.3)}
+.btn-outline{background:transparent;color:var(--white);border:1px solid rgba(255,255,255,.25)}
+.btn-outline:hover{border-color:var(--white)}
+.hero-proof{display:flex;gap:2.5rem;flex-wrap:wrap}
+.hero-proof-item{font-size:.8rem;color:var(--gray-400);display:flex;align-items:center;gap:.4rem}
+.hero-proof-item .check{color:var(--green);font-weight:700}
+
+/* ─── SCROLLING MARQUEE (Partners / Gateways) ─── */
+.marquee-section{padding:2.5rem 0;background:var(--gray-50);border-bottom:1px solid var(--gray-200);overflow:hidden}
+.marquee-section .section-label{text-align:center;display:flex;justify-content:center;margin-bottom:1.25rem}
+.marquee-track{display:flex;width:max-content;animation:marquee 30s linear infinite}
+.marquee-track:hover{animation-play-state:paused}
+.marquee-item{display:flex;align-items:center;gap:2rem;padding:0 1rem;white-space:nowrap;font-size:.9rem;font-weight:700;color:var(--gray-400);letter-spacing:.02em;opacity:.55;transition:opacity .3s}
+.marquee-item:hover{opacity:1}
+.marquee-item::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;opacity:.4}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ─── SCROLL REVEAL ─── */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.reveal.revealed{opacity:1;transform:translateY(0)}
+
+/* ─── CONSUMER SECTION ─── */
+.consumer-section{background:var(--gray-50);border-bottom:1px solid var(--gray-200);padding:4rem 2rem}
+.consumer-section .container{max-width:960px}
+.section-label{font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:.75rem;display:inline-flex;align-items:center;gap:.5rem}
+.section-label::before{content:'';width:20px;height:1px;background:var(--green)}
+.section-title{font-family:'Fraunces',serif;font-size:clamp(1.6rem,3.5vw,2.2rem);font-weight:700;margin-bottom:1rem;color:var(--navy)}
+.consumer-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2rem}
+@media(max-width:700px){.consumer-grid{grid-template-columns:1fr}}
+.consumer-stat{background:var(--white);border:1px solid var(--gray-200);border-radius:10px;padding:1.75rem;transition:all .25s}
+.consumer-stat:hover{border-color:var(--green);box-shadow:0 4px 16px rgba(43,192,0,.08);transform:translateY(-2px)}
+.consumer-stat p{color:var(--gray-600);font-size:.95rem;line-height:1.6}
+.consumer-stat .stat-highlight{color:var(--green);font-weight:800;font-family:'Fraunces',serif;font-size:1.05rem}
+.consumer-stat .stat-bar{width:100%;height:3px;background:var(--gray-200);border-radius:3px;margin-top:1rem;overflow:hidden}
+.consumer-stat .stat-bar-fill{height:100%;background:var(--green);border-radius:3px;opacity:.5}
+.consumer-insight{background:var(--navy);color:var(--white);border-radius:10px;padding:2rem;margin-top:2rem}
+.consumer-insight p{font-size:1.05rem;line-height:1.7;font-weight:300}
+.consumer-insight strong{color:var(--green);font-weight:600}
+
+/* ─── PROBLEM SECTION ─── */
+.problem-section{padding:4.5rem 2rem;border-bottom:1px solid var(--gray-200)}
+.problem-section .section-title{max-width:700px}
+.problem-desc{color:var(--gray-600);font-size:1rem;max-width:680px;margin-bottom:2.5rem;line-height:1.7}
+.risk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}
+.risk-item{display:flex;align-items:flex-start;gap:.75rem;padding:1rem;border-radius:8px;background:var(--gray-50);border:1px solid var(--gray-200);transition:all .25s}
+.risk-item:hover{border-color:var(--red);background:rgba(239,68,68,.02)}
+.risk-icon{color:var(--red);font-size:1.1rem;flex-shrink:0;margin-top:2px}
+.risk-item p{font-size:.88rem;color:var(--gray-600);line-height:1.5}
+
+/* ─── HOW IT WORKS ─── */
+.how-section{padding:4.5rem 2rem;background:var(--navy);color:var(--white)}
+.how-section .section-label{color:var(--green)}
+.how-section .section-label::before{background:var(--green)}
+.how-section .section-title{color:var(--white);max-width:700px}
+.how-desc{color:var(--gray-400);font-size:1rem;max-width:680px;margin-bottom:3rem;line-height:1.7;font-weight:300}
+.step-flow{display:flex;flex-direction:column;gap:0}
+.step{display:grid;grid-template-columns:80px 1fr;gap:1.5rem;padding:2rem 0;border-bottom:1px solid rgba(255,255,255,.06);position:relative}
+.step:last-child{border-bottom:none}
+.step-num{font-family:'Fraunces',serif;font-size:2.8rem;font-weight:700;color:rgba(43,192,0,.3);line-height:1}
+.step-content h3{font-size:1.1rem;font-weight:700;margin-bottom:.5rem;color:var(--white)}
+.step-content p{color:var(--gray-400);font-size:.92rem;line-height:1.65;font-weight:300}
+.step-content .tech-tag{display:inline-block;margin-top:.75rem;padding:.3rem .75rem;border-radius:100px;font-size:.7rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:rgba(43,192,0,.1);color:var(--green);border:1px solid rgba(43,192,0,.2)}
+
+/* ─── INTEGRITY SECTION ─── */
+.integrity-section{padding:4.5rem 2rem;background:var(--navy-mid);color:var(--white);border-top:1px solid rgba(255,255,255,.04)}
+.integrity-section .section-label{color:var(--green)}
+.integrity-section .section-label::before{background:var(--green)}
+.integrity-section .section-title{color:var(--white)}
+.integrity-desc{color:var(--gray-400);font-size:1rem;max-width:680px;margin-bottom:2.5rem;line-height:1.7;font-weight:300}
+.integrity-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem}
+.integrity-card{background:var(--navy-light);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:1.75rem;transition:all .25s}
+.integrity-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.15);border-color:rgba(43,192,0,.3)}
+.integrity-card h4{font-size:.95rem;font-weight:700;color:var(--white);margin-bottom:.5rem}
+.integrity-card p{color:var(--gray-400);font-size:.88rem;line-height:1.6;font-weight:300}
+.integrity-card .icon-box{width:36px;height:36px;border-radius:8px;background:rgba(43,192,0,.12);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;font-size:1rem}
+
+/* ─── DIY SECTION ─── */
+.diy-section{padding:3.5rem 2rem;background:var(--navy);color:var(--white);border-top:1px solid rgba(255,255,255,.04)}
+.diy-box{max-width:800px;margin:0 auto;background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15);border-radius:12px;padding:2.5rem}
+.diy-box h3{font-family:'Fraunces',serif;font-size:1.3rem;color:var(--white);margin-bottom:1rem}
+.diy-box p{color:var(--gray-400);font-size:.92rem;line-height:1.7;margin-bottom:1rem;font-weight:300}
+.diy-box .punchline{color:var(--green);font-weight:600;font-size:.95rem;padding:1rem;background:rgba(43,192,0,.05);border-radius:8px;border-left:3px solid var(--green)}
+
+/* ─── RESULTS SECTION ─── */
+.results-section{padding:4.5rem 2rem;background:var(--white)}
+.results-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.25rem;margin-top:2.5rem}
+.result-card{border:1px solid var(--gray-200);border-radius:10px;padding:1.75rem;transition:all .25s}
+.result-card:hover{border-color:var(--green);box-shadow:0 4px 16px rgba(43,192,0,.08);transform:translateY(-2px)}
+.result-card .result-value{font-family:'Fraunces',serif;font-size:2rem;font-weight:700;color:var(--green)}
+.result-card h4{font-size:.95rem;font-weight:600;color:var(--navy);margin-top:.25rem;margin-bottom:.5rem}
+.result-card p{color:var(--gray-600);font-size:.85rem;line-height:1.5}
+
+/* ─── GATEWAY SECTION ─── */
+.gateway-section{padding:2.5rem 0;background:var(--gray-50);border-top:1px solid var(--gray-200);overflow:hidden;text-align:center}
+.gateway-section .section-label{display:flex;justify-content:center;margin-bottom:.25rem}
+.gateway-section .section-title{margin-bottom:.5rem}
+.gateway-desc{color:var(--gray-600);font-size:.95rem;margin:0 auto 1.5rem;line-height:1.6}
+.gateway-track{display:flex;width:max-content;animation:marquee-gw 25s linear infinite}
+.gateway-track:hover{animation-play-state:paused}
+.gateway-item{display:flex;align-items:center;gap:2rem;padding:0 1rem;white-space:nowrap;font-size:.9rem;font-weight:700;color:var(--steel-blue);letter-spacing:.02em;opacity:.5;transition:opacity .3s}
+.gateway-item:hover{opacity:1}
+.gateway-item::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--steel-blue);flex-shrink:0;opacity:.3}
+.gateway-coming{color:var(--gray-400);font-size:.78rem;font-weight:500;font-style:italic;margin-top:1rem;letter-spacing:.02em}
+@keyframes marquee-gw{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ─── BADGE SECTION ─── */
+.badge-section{padding:4.5rem 2rem;background:var(--white);border-top:1px solid var(--gray-200)}
+.badge-layout{display:grid;grid-template-columns:1fr 1fr;gap:3.5rem;align-items:center;margin-top:2.5rem}
+@media(max-width:768px){.badge-layout{grid-template-columns:1fr}}
+.badge-visual{display:flex;justify-content:center;align-items:center}
+.badge-mockup{position:relative;width:340px}
+.badge-paypage{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:12px;padding:2rem;box-shadow:0 8px 32px rgba(0,0,0,.06)}
+.badge-paypage .pp-header{font-size:.75rem;color:var(--gray-400);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1.25rem;font-weight:600}
+.badge-paypage .pp-field{background:var(--white);border:1px solid var(--gray-200);border-radius:6px;padding:.65rem .85rem;margin-bottom:.6rem;font-size:.8rem;color:var(--gray-400)}
+.badge-paypage .pp-row{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.badge-paypage .pp-btn{background:var(--green);color:var(--white);border:none;border-radius:6px;padding:.75rem;font-size:.85rem;font-weight:600;width:100%;margin-top:.75rem;cursor:default;font-family:'DM Sans',sans-serif}
+.trust-badge-widget{margin-top:1rem;background:linear-gradient(135deg,#e8fbe5 0%,#f0fdf9 50%,#e5f5e0 100%);border:1.5px solid var(--green);border-radius:50px;padding:.7rem 1.1rem;display:flex;align-items:center;gap:.75rem}
+.tb-badge-img{width:44px;height:44px;flex-shrink:0}
+.tb-text{font-size:.72rem;line-height:1.4;color:var(--gray-800)}
+.tb-text .tb-verified{color:var(--steel-blue);font-weight:800;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;display:block}
+.tb-text .tb-guarantee{color:var(--green-dark);font-weight:700;font-size:.78rem;display:block;margin-top:.1rem}
+.tb-text .tb-sub{font-size:.62rem;color:var(--gray-600);margin-top:.15rem;display:block}
+.badge-arrow{position:absolute;right:-45px;top:72%;font-size:.65rem;color:var(--green);font-weight:600;writing-mode:vertical-rl;letter-spacing:.1em;text-transform:uppercase}
+@media(max-width:768px){.badge-arrow{display:none}}
+.badge-content h3{font-family:'Fraunces',serif;font-size:1.3rem;color:var(--navy);margin-bottom:.75rem}
+.badge-content>p{color:var(--gray-600);font-size:.95rem;line-height:1.7;margin-bottom:1.5rem}
+.badge-stats{display:flex;flex-direction:column;gap:1rem}
+.badge-stat{display:flex;align-items:flex-start;gap:.75rem}
+.badge-stat .bs-num{font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;color:var(--green);line-height:1;flex-shrink:0;min-width:55px}
+.badge-stat .bs-text{font-size:.85rem;color:var(--gray-600);line-height:1.5}
+.badge-dual{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-top:2rem}
+@media(max-width:768px){.badge-dual{grid-template-columns:1fr}}
+.badge-benefit{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:10px;padding:1.5rem;transition:all .25s}
+.badge-benefit:hover{border-color:var(--green);transform:translateY(-2px)}
+.badge-benefit h4{font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:.4rem;display:flex;align-items:center;gap:.4rem}
+.badge-benefit p{color:var(--gray-600);font-size:.82rem;line-height:1.55}
+
+/* ─── COST SECTION ─── */
+.cost-section{padding:4rem 2rem;background:var(--gray-50);border-top:1px solid var(--gray-200)}
+.cost-section .container{max-width:800px}
+.cost-compare{display:grid;grid-template-columns:1fr auto 1fr;gap:1.5rem;align-items:center;margin-top:2rem}
+@media(max-width:600px){.cost-compare{grid-template-columns:1fr}.cost-vs{transform:rotate(90deg)}}
+.cost-box{border-radius:10px;padding:2rem;text-align:center;transition:all .25s}
+.cost-box.bad{background:var(--white);border:1px solid var(--gray-200)}
+.cost-box.good{background:var(--navy);color:var(--white);border:2px solid var(--green)}
+.cost-box.good:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(43,192,0,.15)}
+.cost-box .cost-label{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:.5rem}
+.cost-box.bad .cost-label{color:var(--gray-400)}
+.cost-box.good .cost-label{color:var(--green)}
+.cost-box .cost-amount{font-family:'Fraunces',serif;font-size:2.5rem;font-weight:700}
+.cost-box.bad .cost-amount{color:var(--red)}
+.cost-box.good .cost-amount{color:var(--green)}
+.cost-box .cost-detail{font-size:.82rem;margin-top:.5rem;line-height:1.5}
+.cost-box.bad .cost-detail{color:var(--gray-600)}
+.cost-box.good .cost-detail{color:var(--gray-400)}
+.cost-vs{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;color:var(--gray-400);text-align:center}
+
+/* ─── AUDIENCE SECTION ─── */
+.audience-section{padding:4.5rem 2rem;background:var(--white);border-top:1px solid var(--gray-200)}
+.audience-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2.5rem}
+@media(max-width:700px){.audience-grid{grid-template-columns:1fr}}
+.audience-card{background:var(--navy);border-radius:12px;padding:2.5rem;color:var(--white);transition:all .25s}
+.audience-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.2)}
+.audience-card .aud-label{font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:.5rem}
+.audience-card h3{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700;margin-bottom:.75rem}
+.audience-card p{color:var(--gray-400);font-size:.9rem;line-height:1.65;font-weight:300}
+
+/* ─── CREDIBILITY SECTION ─── */
+.cred-section{padding:4rem 2rem;background:var(--gray-50);border-top:1px solid var(--gray-200)}
+.cred-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;margin-top:2rem}
+.cred-item{padding:1.25rem;transition:all .25s}
+.cred-item:hover{transform:translateY(-2px)}
+.cred-item .cred-num{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:700;color:var(--green)}
+.cred-item p{color:var(--gray-600);font-size:.85rem;margin-top:.25rem}
+
+/* ─── TESTIMONIAL SECTION ─── */
+.testimonial-section{padding:4.5rem 2rem;background:var(--white);border-top:1px solid var(--gray-200)}
+.testimonial-section .container{max-width:800px;text-align:center}
+.testimonial-quote{font-family:'Fraunces',serif;font-size:clamp(1.15rem,2.5vw,1.5rem);color:var(--navy);font-style:italic;line-height:1.65;margin:1.5rem 0;position:relative;padding:0 2rem}
+.testimonial-quote::before{content:'\201C';font-family:'Fraunces',serif;font-size:5rem;color:var(--green);position:absolute;top:-1.5rem;left:-.5rem;line-height:1;opacity:.4}
+.testimonial-attr{margin-top:1.5rem}
+.testimonial-attr strong{color:var(--navy);font-size:.9rem}
+.testimonial-attr span{color:var(--gray-400);font-size:.82rem}
+
+/* ─── CTA SECTION ─── */
+.cta-section{padding:5rem 2rem;background:var(--navy);color:var(--white);text-align:center}
+.cta-section h2{font-family:'Fraunces',serif;font-size:clamp(1.8rem,4vw,2.5rem);max-width:650px;margin:0 auto 1rem}
+.cta-section p{color:var(--gray-400);font-size:1rem;max-width:550px;margin:0 auto 2rem;font-weight:300}
+.cta-section .btn-primary{font-size:1rem;padding:1rem 2.5rem;border-radius:50px}
+.cta-fine{color:var(--gray-400);font-size:.8rem;margin-top:1.25rem}
+
+/* ─── FOOTER ─── */
+.site-footer{background:var(--navy);border-top:1px solid rgba(255,255,255,.06);padding:2.5rem 2rem}
+.footer-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1.5rem;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(255,255,255,.06)}
+.footer-logo img{height:36px;opacity:.7}
+.footer-newsletter{display:flex;gap:.5rem;align-items:center}
+.footer-newsletter input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.55rem .85rem;font-size:.82rem;color:var(--white);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;width:220px}
+.footer-newsletter input::placeholder{color:var(--gray-400)}
+.footer-newsletter input:focus{border-color:var(--green)}
+.footer-newsletter button{background:var(--green);color:var(--white);border:none;border-radius:6px;padding:.55rem 1.1rem;font-size:.82rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s}
+.footer-newsletter button:hover{background:var(--green-dark)}
+.footer-bottom{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem}
+.footer-copy{font-size:.8rem;color:var(--gray-400)}
+.footer-links{display:flex;flex-wrap:wrap;gap:1.5rem}
+.footer-links a{font-size:.8rem;color:var(--gray-400);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--white)}
+
+/* ─── AUDIENCE CONTENT TOGGLE ─── */
+.content-merchant,.content-partner{transition:opacity .3s ease}
+.content-partner{display:none}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAVIGATION ═══ -->
+<nav class="site-nav">
+  <a href="https://getquickrefund.com" class="logo">
+    <img src="https://getquickrefund.com/quickrefund_logo.svg" alt="QuickRefund Logo">
+  </a>
+  <button class="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-links">
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-trigger">Our Products <span class="dropdown-arrow">&#9662;</span></button>
+      <div class="nav-dropdown-menu">
+        <a href="https://getquickrefund.com/qr">QuickRefund Core</a>
+        <a href="https://getquickrefund.com/qr-one">QR One</a>
+        <a href="https://getquickrefund.com/qr-cancel">QR Cancel</a>
+        <a href="https://getquickrefund.com/qr-chat">QR Chat</a>
+        <a href="https://getquickrefund.com/qr-trust-badge">QR Trust Badge</a>
+      </div>
+    </div>
+    <a href="https://getquickrefund.com/faq">FAQs</a>
+    <a href="https://getquickrefund.com/resources">Resources</a>
+    <a href="https://getquickrefund.com/about">About Us</a>
+    <a href="https://admin.quickrefund.ai">Merchant Login</a>
+    <a href="https://getquickrefund.com/request-demo" class="btn-demo">Request Demo</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-tabs">
+      <button class="hero-tab active" data-audience="merchant">For Merchants</button>
+      <button class="hero-tab" data-audience="partner">For ISOs &amp; Acquirers</button>
+    </div>
+
+    <!-- Merchant Content (Default) -->
+    <div class="content-merchant" id="hero-merchant">
+      <div class="hero-label">Visa VAMP Compliance Solution</div>
+      <h1>Reduce Your VAMP Ratio by 50%.<br><span>Before Your Acquirer Calls.</span></h1>
+      <p class="hero-sub">You're one bad month away from a capped MID. QuickRefund intercepts disputes at the gateway level — server-to-server, against the original transaction. No alerts. No chargebacks. No ratio damage.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="https://getquickrefund.com/request-demo">Get a Free VAMP Assessment</a>
+        <a class="btn btn-outline" href="#how-it-works">See How It Works ↓</a>
+      </div>
+    </div>
+
+    <!-- Partner Content -->
+    <div class="content-partner" id="hero-partner">
+      <div class="hero-label">Portfolio-Wide VAMP Protection</div>
+      <h1>Deploy VAMP Protection<br><span>Across Your Entire Portfolio.</span></h1>
+      <p class="hero-sub">Under VAMP, one high-risk merchant affects your standing with Visa. QuickRefund is the value-added service you deploy across your book — protecting your portfolio metrics, your reserves, and your processing relationships.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="https://getquickrefund.com/request-demo">Request Portfolio Analysis</a>
+        <a class="btn btn-outline" href="#how-it-works">See How It Works ↓</a>
+      </div>
+    </div>
+
+    <div class="hero-proof">
+      <span class="hero-proof-item"><span class="check">✓</span> Gateway-level integration</span>
+      <span class="hero-proof-item"><span class="check">✓</span> Results in weeks, not months</span>
+      <span class="hero-proof-item"><span class="check">✓</span> Performance-based pricing</span>
+      <span class="hero-proof-item"><span class="check">✓</span> 165 patent items filed</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PARTNER & GATEWAY MARQUEE ═══ -->
+<section class="marquee-section">
+  <div class="section-label">Trusted By Our Partners</div>
+  <div class="marquee-track">
+    <span class="marquee-item">Micamp</span>
+    <span class="marquee-item">Fyntek</span>
+    <span class="marquee-item">Corduro</span>
+    <span class="marquee-item">Hagen Pay</span>
+    <span class="marquee-item">Ainsworth Payments</span>
+    <span class="marquee-item">Maverick</span>
+    <span class="marquee-item">RevitPay</span>
+    <span class="marquee-item">ExpiTrans</span>
+    <span class="marquee-item">Mosaic Payments</span>
+    <span class="marquee-item">Synergist Payments</span>
+    <span class="marquee-item">Bulletproof</span>
+    <span class="marquee-item">Konectd</span>
+    <span class="marquee-item">Seamless Chex</span>
+    <span class="marquee-item">RouteSense</span>
+    <span class="marquee-item">Ionia Pay</span>
+    <span class="marquee-item">Coastal Pay</span>
+    <!-- Duplicate for seamless loop -->
+    <span class="marquee-item">Micamp</span>
+    <span class="marquee-item">Fyntek</span>
+    <span class="marquee-item">Corduro</span>
+    <span class="marquee-item">Hagen Pay</span>
+    <span class="marquee-item">Ainsworth Payments</span>
+    <span class="marquee-item">Maverick</span>
+    <span class="marquee-item">RevitPay</span>
+    <span class="marquee-item">ExpiTrans</span>
+    <span class="marquee-item">Mosaic Payments</span>
+    <span class="marquee-item">Synergist Payments</span>
+    <span class="marquee-item">Bulletproof</span>
+    <span class="marquee-item">Konectd</span>
+    <span class="marquee-item">Seamless Chex</span>
+    <span class="marquee-item">RouteSense</span>
+    <span class="marquee-item">Ionia Pay</span>
+    <span class="marquee-item">Coastal Pay</span>
+  </div>
+</section>
+
+<!-- ═══ CONSUMER PROBLEM ═══ -->
+<section class="consumer-section">
+  <div class="container">
+    <div class="section-label">The Real Problem</div>
+    <h2 class="section-title">Your Customers Aren't Calling You. They're Calling Their Bank.</h2>
+    <div class="consumer-grid">
+      <div class="consumer-stat reveal"><p><span class="stat-highlight">84% of consumers</span> say filing a chargeback is easier than requesting a refund from the merchant.</p><div class="stat-bar"><div class="stat-bar-fill" style="width:84%"></div></div></div>
+      <div class="consumer-stat reveal"><p><span class="stat-highlight">52% skip contacting the merchant</span> entirely before disputing through their bank.</p><div class="stat-bar"><div class="stat-bar-fill" style="width:52%"></div></div></div>
+      <div class="consumer-stat reveal"><p><span class="stat-highlight">85% of consumers</span> who feel ignored by customer service will file a chargeback.</p><div class="stat-bar"><div class="stat-bar-fill" style="width:85%"></div></div></div>
+      <div class="consumer-stat reveal"><p><span class="stat-highlight">75% of online fraud</span> is first-party "friendly fraud" — real customers, real purchases, real disputes.</p><div class="stat-bar"><div class="stat-bar-fill" style="width:75%"></div></div></div>
+    </div>
+    <div class="consumer-insight reveal">
+      <p>The consumer who wants their money back <strong>will get it</strong> — either through you at $10, or through their bank at $100+. The only question is which path is easier. Right now, the bank is winning. <strong>QuickRefund makes the refund path faster than the chargeback path.</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRESSURE / RISK ═══ -->
+<section class="problem-section">
+  <div class="container">
+    <!-- Merchant version -->
+    <div class="content-merchant">
+      <div class="section-label">The Pressure</div>
+      <h2 class="section-title">Your Ratios Are Climbing. Your Acquirer Is Watching.</h2>
+      <p class="problem-desc">Visa VAMP enforcement is active. The "Excessive" threshold tightened to 1.5% on April 1, 2026. Merchants trending above it face capped accounts, forced reserves, and termination. You do not get a warning first.</p>
+      <div class="risk-grid">
+        <div class="risk-item reveal"><span class="risk-icon">●</span><p>Combined fraud and dispute ratio approaching the 1.5% threshold</p></div>
+        <div class="risk-item reveal"><span class="risk-icon">●</span><p>Acquirer calling about account health and performance reviews</p></div>
+        <div class="risk-item reveal"><span class="risk-icon">●</span><p>Forced enrollment in alert programs at your own cost — and alerts no longer exclude fraud from VAMP</p></div>
+        <div class="risk-item reveal"><span class="risk-icon">●</span><p>New merchant accounts underwritten at higher reserves</p></div>
+        <div class="risk-item reveal"><span class="risk-icon">●</span><p>One bad month puts your entire processing relationship at risk</p></div>
+        <div class="risk-item reveal"><span class="risk-icon">●</span><p>RDR and CDRN no longer shield fraud-related disputes from your VAMP ratio</p></div>
+      </div>
+    </div>
+    <!-- Acquirer/ISO version -->
+    <div class="content-partner">
+      <div class="section-label">The Pressure</div>
+      <h2 class="section-title">Your Portfolio's VAMP Exposure Is Growing. Visa Is Watching.</h2>
+      <p class="problem-desc">Under VAMP, acquirer-level thresholds sit at 0.5–0.7%. A single high-risk merchant can drag your entire portfolio into review. The cost of inaction isn't one lost account — it's systemic risk to your processing relationships and your revenue.</p>
+      <div class="risk-grid">
+        <div class="risk-item reveal"><span class="risk-icon">●</span><p>Portfolio-level VAMP thresholds at 0.5–0.7% — one bad merchant puts your entire book at risk</p></div>
+        <div class="risk-item reveal"><span class="risk-icon">●</span><p>Visa enforcement actions escalating — fines, monitoring programs, and potential BIN restrictions</p></div>
+        <div class="risk-item reveal"><span class="risk-icon">●</span><p>Growing pressure to terminate merchants instead of remediating them — losing revenue you've worked to build</p></div>
+        <div class="risk-item reveal"><span class="risk-icon">●</span><p>Alert programs adding cost without reducing your portfolio's VAMP ratio — fraud-flagged disputes still count</p></div>
+        <div class="risk-item reveal"><span class="risk-icon">●</span><p>Reserves climbing across your merchant base, straining relationships and increasing attrition</p></div>
+        <div class="risk-item reveal"><span class="risk-icon">●</span><p>No scalable remediation tool to deploy across your portfolio — you're managing risk merchant by merchant</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section class="how-section" id="how-it-works">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">QuickRefund Resolves Disputes Before They Enter the Banking System.</h2>
+    <p class="how-desc">Most tools activate after a dispute reaches the bank. By then, the TC40 or TC15 is already filed and your ratio is already hit. QuickRefund works earlier — at the gateway level — so the dispute never exists.</p>
+    <div class="step-flow">
+      <div class="step reveal"><div class="step-num">01</div><div class="step-content"><h3>We Connect Directly to Your Gateway</h3><p>QuickRefund integrates server-to-server with your payment gateway (NMI, Authorize.net, Stripe, and others). We see every transaction at the source — not through a third-party feed, not through scraping, not through alerts. Direct gateway access. Setup takes approximately 5 minutes with admin credentials.</p><span class="tech-tag">Server-to-server gateway integration</span></div></div>
+      <div class="step reveal"><div class="step-num">02</div><div class="step-content"><h3>We Reach the Consumer Before Their Bank Does</h3><p>After a transaction processes, QuickRefund sends branded, configurable messages (email and/or SMS) to the consumer with a secure one-click refund link. The consumer can resolve their issue directly — no phone calls, no bank, no dispute. The messaging is fully customizable: timing, frequency, and link expiration are all under your control.</p><span class="tech-tag">Patent-pending one-click refund link</span></div></div>
+      <div class="step reveal"><div class="step-num">03</div><div class="step-content"><h3>QR Chat Resolves Descriptor Confusion First</h3><p>Many chargebacks happen because the consumer doesn't recognize the charge on their statement. QR Chat is an AI-powered conversational interface that helps consumers identify the transaction before they escalate. If the consumer recognizes the charge, no refund is needed. If they don't, the refund path is one click away. This alone eliminates a significant percentage of "unrecognized charge" disputes.</p><span class="tech-tag">AI-powered descriptor resolution</span></div></div>
+      <div class="step reveal"><div class="step-num">04</div><div class="step-content"><h3>You Stay in Control — Every Refund, Every Time</h3><p>Merchants configure thresholds, timing controls, amount limits, and per-card restrictions. You decide what gets refunded automatically and what goes to a queue for review. No surprise refunds. No open-ended refund buttons. You can set dollar caps, time-based restrictions (e.g., no refunds in the first 7 days), and per-card limits to prevent abuse.</p><span class="tech-tag">Full merchant control layer</span></div></div>
+      <div class="step reveal"><div class="step-num">05</div><div class="step-content"><h3>Refunds Execute at the Gateway — Against the Original Transaction</h3><p>This is the critical difference. Every QuickRefund refund goes server-to-server through your gateway, against the original transaction ID, back to the original payment method. One refund per transaction. No double-dips across tools or teams. The refund is tied to the exact transaction identity that alerts and chargebacks reference — so once it's closed, a chargeback on that transaction is not possible.</p><span class="tech-tag">Closed-loop idempotent refunds</span></div></div>
+      <div class="step reveal"><div class="step-num">06</div><div class="step-content"><h3>Your VAMP Ratio Stays Clean</h3><p>Because the transaction is resolved before the consumer contacts their bank, no TC40 is filed, no TC15 is created, and nothing touches your VAMP ratio. The dispute simply never happens. Your acquirer sees improving metrics. Your reserves stay untouched. Your processing relationship is protected.</p><span class="tech-tag">Zero ratio impact</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ REFUND INTEGRITY ═══ -->
+<section class="integrity-section">
+  <div class="container">
+    <div class="section-label">Why This Can't Be Replicated</div>
+    <h2 class="section-title">Refund Integrity. Not a Refund Button.</h2>
+    <p class="integrity-desc">Merchants keep reducing this to "AI chat plus a refund button." The messaging is easy. The hard part is control and refund integrity — ensuring every refund is executed safely, tied to the original transaction, and auditable.</p>
+    <div class="integrity-grid">
+      <div class="integrity-card reveal"><div class="icon-box">🔒</div><h4>One Refund Per Transaction</h4><p>Every refund is keyed to the original transaction ID. Idempotent by design — the same transaction cannot be refunded twice, even if multiple tools or teams are involved.</p></div>
+      <div class="integrity-card reveal"><div class="icon-box">🏦</div><h4>Original Payment Method Only</h4><p>Refunds go back to the card that was charged. Not to a different account, not to store credit, not to a wallet. This is how Visa and Mastercard expect refunds to work.</p></div>
+      <div class="integrity-card reveal"><div class="icon-box">🛡️</div><h4>Trusted Third Party</h4><p>QuickRefund operates as a neutral, trusted layer between the merchant and consumer. The consumer sees a branded, secure refund experience. The merchant gets auditable proof. Neither side can game the system.</p></div>
+      <div class="integrity-card reveal"><div class="icon-box">📊</div><h4>Full Audit Trail</h4><p>Every refund action is logged with timestamp, transaction ID, consumer action, approval status, and outcome. Risk owners and acquirers can verify exactly what happened and when.</p></div>
+      <div class="integrity-card reveal"><div class="icon-box">🎛️</div><h4>Guardrails Against Over-Refunding</h4><p>Thresholds, caps, throttles, and exception routing prevent runaway refunds. Merchants set the rules. QuickRefund enforces them at the gateway level.</p></div>
+      <div class="integrity-card reveal"><div class="icon-box">📝</div><h4>Remediation Reporting</h4><p>QuickRefund generates compliance-ready remediation reports showing acquirers and networks exactly what prevention steps are in place. Documentation that risk teams trust.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DIY OBJECTION ═══ -->
+<section class="diy-section">
+  <div class="container">
+    <div class="diy-box reveal">
+      <h3>"We Can Just Build a Refund Button Ourselves."</h3>
+      <p>If a merchant says they can "just email a refund button," they have to answer one question: <strong>How will you execute a refund against the original transaction ID without gateway access?</strong></p>
+      <p>The options are all bad: sending customers into the gateway UI (they can't authenticate), embedding credentials in an email (security nightmare), or calling the gateway API from the backend (now you need server-side permissions, idempotency, double-refund prevention, and audit logs).</p>
+      <div class="punchline">If you're not refunding server-to-server through your gateway against the original transaction ID, back to the original payment method, you're not doing what we do. You're just sending money and hoping it prevents disputes.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ RESULTS ═══ -->
+<section class="results-section">
+  <div class="container">
+    <!-- Merchant version -->
+    <div class="content-merchant">
+      <div class="section-label">Results</div>
+      <h2 class="section-title">What Merchants Gain</h2>
+      <div class="results-grid">
+        <div class="result-card reveal"><div class="result-value">50%</div><h4>VAMP Ratio Reduction</h4><p>Within 30 days of going live. Disputes intercepted before they enter the banking system.</p></div>
+        <div class="result-card reveal"><div class="result-value">$0</div><h4>No Increased Reserves</h4><p>Protect working capital and cash flow. Cleaner ratios mean acquirers release reserves, not increase them.</p></div>
+        <div class="result-card reveal"><div class="result-value">0</div><h4>No Capped MIDs</h4><p>Keep processing without interruption. Stay below thresholds and your account stays open.</p></div>
+        <div class="result-card reveal"><div class="result-value">5 min</div><h4>Setup Time</h4><p>Gateway credentials, configuration, and go-live. No multi-week integration projects. No engineering team required.</p></div>
+      </div>
+    </div>
+    <!-- Acquirer/ISO version -->
+    <div class="content-partner">
+      <div class="section-label">Results</div>
+      <h2 class="section-title">What Acquirers &amp; ISOs Gain</h2>
+      <div class="results-grid">
+        <div class="result-card reveal"><div class="result-value">50%</div><h4>Portfolio VAMP Reduction</h4><p>Reduce dispute ratios across your merchant base within 30 days. Protect your portfolio-level standing with Visa.</p></div>
+        <div class="result-card reveal"><div class="result-value">$0</div><h4>Retain Merchants, Preserve Reserves</h4><p>Maintain existing reserves without terminating merchants. Remediate instead of cutting — keep the revenue you've built.</p></div>
+        <div class="result-card reveal"><div class="result-value">↑</div><h4>Continued Portfolio Growth</h4><p>Onboard and retain higher-risk verticals with confidence. QuickRefund gives you the remediation layer to grow without exposure.</p></div>
+        <div class="result-card reveal"><div class="result-value">5 min</div><h4>Frictionless Merchant Deployment</h4><p>Your merchants install it in under 5 minutes with no engineering required and no additional cost to them. Deploy across your book at scale.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ GATEWAY INTEGRATIONS ═══ -->
+<section class="gateway-section">
+  <div class="section-label">Integrations</div>
+  <h2 class="section-title">Compatible With Your Payment Stack</h2>
+  <p class="gateway-desc">QuickRefund connects server-to-server with the gateways you already use.</p>
+  <div class="gateway-track">
+    <span class="gateway-item">NMI</span>
+    <span class="gateway-item">Stripe</span>
+    <span class="gateway-item">Authorize.net</span>
+    <span class="gateway-item">PayPal</span>
+    <span class="gateway-item">ExpiTrans</span>
+    <span class="gateway-item">CyberSource</span>
+    <span class="gateway-item">RevitPay</span>
+    <span class="gateway-item">Square</span>
+    <span class="gateway-item">Dejavoo</span>
+    <!-- Duplicate for seamless loop -->
+    <span class="gateway-item">NMI</span>
+    <span class="gateway-item">Stripe</span>
+    <span class="gateway-item">Authorize.net</span>
+    <span class="gateway-item">PayPal</span>
+    <span class="gateway-item">ExpiTrans</span>
+    <span class="gateway-item">CyberSource</span>
+    <span class="gateway-item">RevitPay</span>
+    <span class="gateway-item">Square</span>
+    <span class="gateway-item">Dejavoo</span>
+  </div>
+  <p class="gateway-coming">+ more integrations coming soon</p>
+</section>
+
+<!-- ═══ QR TRUST BADGE ═══ -->
+<section class="badge-section">
+  <div class="container">
+    <div class="section-label">Front-End Protection</div>
+    <h2 class="section-title">The QR Trust Badge: Prevent Disputes Before They Start.</h2>
+    <div class="badge-layout">
+      <div class="badge-visual">
+        <div class="badge-mockup">
+          <div class="badge-paypage">
+            <div class="pp-header">Payment Details</div>
+            <div class="pp-field">4242 •••• •••• 1234</div>
+            <div class="pp-row"><div class="pp-field">12 / 28</div><div class="pp-field">•••</div></div>
+            <div class="pp-field">John Smith</div>
+            <button class="pp-btn">Pay $49.99</button>
+            <div class="trust-badge-widget">
+              <svg class="tb-badge-img" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><g><polygon fill="#2bc000" points="249.87 112.56 121.1 171.8 249.87 274.7"/><polygon fill="#2bc000" points="378.64 171.8 249.87 112.56 249.87 274.7"/><path fill="#2bc000" d="M121.1,171.8l-7.83,3.6s-6.59,115.2,32.92,182.14l103.68-82.85-128.77-102.9Z"/><path fill="#2bc000" d="M146.19,357.55s.03.06.05.09c0,0,21.08,38.9,103.63,77.8v-160.74l-103.68,82.85Z"/><path fill="#2bc000" d="M386.47,175.41l-7.83-3.6-128.77,102.9,103.68,82.85c39.51-66.95,32.92-182.14,32.92-182.14Z"/><path fill="#2bc000" d="M249.87,435.44c82.55-38.9,103.63-77.8,103.63-77.8.02-.03.03-.06.05-.09l-103.68-82.85v160.74Z"/></g><polygon fill="#75a4c0" points="249.87 131.32 135.99 183.71 249.87 274.7"/><path fill="#5d8399" d="M135.99,183.71l-5.9,2.72c-.46,28.24.98,109.46,29.65,160.3l90.13-72.02-113.88-91Z"/><polygon fill="#4786ab" points="363.74 183.71 249.87 131.32 249.87 274.7"/><path fill="#196896" d="M369.65,186.42l-5.9-2.72-113.88,90.99,90.13,72.02c28.67-50.84,30.1-132.06,29.65-160.3Z"/><path fill="#416d87" d="M159.74,346.72c.43.77.85,1.55,1.3,2.31l.07.09.19.37c1.16,1.92,21.23,33.76,88.57,67.03v-141.82l-90.13,72.02Z"/><path fill="#134e71" d="M249.87,416.52c66.97-33.09,87.19-64.76,88.55-66.99l.29-.49c.45-.75.87-1.54,1.3-2.31l-90.13-72.02v141.82Z"/><path fill="none" stroke="#276f41" stroke-width="6.29" stroke-miterlimit="10" d="M249.87,435.44c82.55-38.9,103.63-77.8,103.63-77.8,39.57-66.94,32.97-182.23,32.97-182.23l-136.6-62.85-136.6,62.85s-6.59,115.3,32.97,182.23c0,0,21.08,38.9,103.63,77.8Z"/><path fill="none" stroke="#fff" stroke-width="3.6" stroke-miterlimit="10" d="M249.87,416.52c-67.34-33.27-87.41-65.11-88.57-67.03l-.19-.37-.07-.09c-29.95-50.66-31.41-133.94-30.95-162.61l119.78-55.11,119.78,55.11c.46,28.67-1,111.95-30.95,162.61l-.29.49c-1.36,2.23-21.57,33.91-88.55,66.99Z"/><path fill="#fff" d="M287.67,244.72l-21.36-.49,7.41-10.11c-6.48-3.27-13.84-5.11-21.6-5.11-26.48,0-47.97,21.32-47.97,47.61s21.49,47.59,47.97,47.59,48-21.32,48-47.59c0-12.3-4.71-23.51-12.45-31.91Z"/><path fill="#2bc000" d="M330.24,303.49c-11.52,32.97-42.9,55.13-78.1,55.13-45.57,0-82.65-36.78-82.65-81.99s37.07-81.99,82.65-81.99c16.29,0,32.01,4.67,45.55,13.57l10.9-14.78,16.7,48.21-51.38-1.14,9.29-12.62c-9.29-5.84-19.99-8.92-31.05-8.92-32.06,0-58.13,25.86-58.13,57.67s26.07,57.67,58.13,57.67c24.76,0,46.83-15.59,54.94-38.78l23.15,7.97Z"/><path fill="#196896" d="M256.67,305.11v9.94h-10.38v-9.05c-5.91-.3-11.58-1.84-14.85-3.46l2.75-12.59c3.9,1.92,8.96,3.65,14.76,3.65,4.63,0,7.63-1.57,7.63-4.51s-2.64-4.97-9.02-7.38c-9.73-3.81-15.77-8.59-15.77-17.4,0-8.11,5.39-14.67,15.31-17.02v-9.08h10.38v8.19c5.72.19,9.86,1.43,12.99,2.81l-2.83,12.16c-2.45-1.11-6.35-2.97-12.56-2.97-5.2,0-7.03,1.97-7.03,4.32s2.48,4.08,10.05,7.19c10.92,4.27,14.71,9.7,14.71,17.7,0,8.62-5.83,15.48-16.15,17.51Z"/></svg>
+              <div class="tb-text">
+                <span class="tb-verified">Verified by QuickRefund</span>
+                <span class="tb-guarantee">Instant Refund Guarantee</span>
+                <span class="tb-sub">Protected Purchase · Trusted by 500+ merchants</span>
+              </div>
+            </div>
+          </div>
+          <div class="badge-arrow">← Trust Badge</div>
+        </div>
+      </div>
+      <div class="badge-content">
+        <h3>The consumer sees protection before they buy. That changes everything.</h3>
+        <p>The QR Trust Badge appears on your checkout page, product pages, and pay pages — telling the consumer that if anything goes wrong, they can get a refund directly from you, instantly. No phone calls. No bank disputes. That single message changes how consumers think about your store and what they do when there's a problem.</p>
+        <div class="badge-stats">
+          <div class="badge-stat reveal"><div class="bs-num">42%</div><div class="bs-text">conversion lift when trust signals are displayed at checkout. Trust badges are the #1 factor in reducing checkout abandonment.</div></div>
+          <div class="badge-stat reveal"><div class="bs-num">60%</div><div class="bs-text">of consumers abandon carts when no trust badges are present. The absence of trust signals is itself a conversion killer.</div></div>
+          <div class="badge-stat reveal"><div class="bs-num">32%</div><div class="bs-text">reduction in cart abandonment when security and refund guarantee badges are displayed near the payment button.</div></div>
+        </div>
+        <div class="badge-dual">
+          <div class="badge-benefit reveal"><h4>📈 Front-End: More Sales</h4><p>Consumers buy with confidence when they know they're protected. The Trust Badge reduces the hesitation that kills conversions — especially for first-time buyers and higher-price-point purchases.</p></div>
+          <div class="badge-benefit reveal"><h4>🛡️ Back-End: Fewer Disputes</h4><p>When consumers know they can get a refund directly from you, they don't go to the bank. The Trust Badge is a visual promise that retrains consumer behavior — come to us first, not your bank. The refund path is right here.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="consumer-insight reveal" style="margin-top:2.5rem;max-width:960px">
+      <p>Here's the psychology: <strong>52% of consumers skip the merchant entirely before filing a dispute.</strong> They do this because they don't believe the merchant will help them. The Trust Badge, visible from the moment of purchase, tells the consumer: "You're protected. If you need a refund, come directly to us — it's faster than calling your bank." This pre-conditions the consumer to choose the refund path over the dispute path, <strong>before they ever have a problem.</strong> That's not just conversion optimization. That's chargeback prevention at the point of sale.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ COST COMPARISON ═══ -->
+<section class="cost-section">
+  <div class="container">
+    <div class="section-label">The Math</div>
+    <h2 class="section-title">The Consumer Will Get Their Money Back Either Way.</h2>
+    <p class="problem-desc">The only question is which path costs you less.</p>
+    <div class="cost-compare">
+      <div class="cost-box bad reveal"><div class="cost-label">Through the Bank</div><div class="cost-amount">$100–250</div><div class="cost-detail">Chargeback fee ($30-50) + lost goods + VAMP fine ($8-10/txn) + operational time + ratio damage + potential account termination</div></div>
+      <div class="cost-vs">vs.</div>
+      <div class="cost-box good reveal"><div class="cost-label">Through QuickRefund</div><div class="cost-amount">$10</div><div class="cost-detail">Per refund. No setup fee. No monthly fee. No ratio impact. No alert cost. Performance-based pricing — you pay only when disputes are prevented.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ AUDIENCE ═══ -->
+<section class="audience-section">
+  <div class="container">
+    <div class="section-label">Who This Is For</div>
+    <h2 class="section-title">Built for Everyone in the Processing Chain.</h2>
+    <div class="audience-grid">
+      <div class="audience-card reveal"><div class="aud-label">Merchants</div><h3>High-Volume E-Commerce, Subscriptions, Nutraceuticals</h3><p>If your dispute ratio is above 1.0% or your acquirer has called, QuickRefund is for you. We stop disputes before they become chargebacks — before they touch your VAMP ratio. You keep your processing relationship, your reserves, and your revenue.</p></div>
+      <div class="audience-card reveal"><div class="aud-label">ISOs & Acquirers</div><h3>Your Entire Portfolio's Ratio Is Your Problem Now</h3><p>Under VAMP, one high-risk merchant affects your standing with Visa. Acquirer thresholds are 0.5-0.7%. QuickRefund is the value-added service you deploy across your book to protect your entire portfolio — not just one merchant at a time.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CREDIBILITY ═══ -->
+<section class="cred-section">
+  <div class="container">
+    <div class="section-label">Why QuickRefund</div>
+    <h2 class="section-title">Built by People Who Know What a Capped MID Costs.</h2>
+    <p class="problem-desc">QuickRefund was not built in a lab. It was built by C-suite payments veterans who have run sponsor banks, processors, acquirers, and ISOs. We built it for our own merchants first. When it worked, we made it available to everyone.</p>
+    <div class="cred-grid">
+      <div class="cred-item reveal"><div class="cred-num">165</div><p>Patent items filed — including the one-click consumer-initiated refund</p></div>
+      <div class="cred-item reveal"><div class="cred-num">$1T+</div><p>In transactions processed by our team's software platforms, still active today</p></div>
+      <div class="cred-item reveal"><div class="cred-num">CRIO</div><p>Former Head of VAMP at Visa now leads our risk intelligence — Kolin Whitley, 25 years in payments</p></div>
+      <div class="cred-item reveal"><div class="cred-num">$0</div><p>Upfront cost — performance-based pricing means you pay only when we prevent disputes</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TESTIMONIAL ═══ -->
+<section class="testimonial-section">
+  <div class="container">
+    <div class="section-label">What Partners Say</div>
+    <blockquote class="testimonial-quote reveal">
+      "QuickRefund did what our alert provider couldn't — it stopped disputes before they hit our VAMP ratio. We went from 1.8% to under 0.9% in three weeks."
+    </blockquote>
+    <div class="testimonial-attr">
+      <strong>Head of Risk, E-Commerce Merchant</strong><br>
+      <span>Processing $2M+/month</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FINAL CTA ═══ -->
+<section class="cta-section">
+  <div class="container">
+    <h2>Your VAMP Ratio Problem Has a Solution. Let Us Show You.</h2>
+    <p>Get a free VAMP assessment. We analyze your current ratios, identify where disputes are entering the system, and show you exactly what QuickRefund would have prevented.</p>
+    <a class="btn btn-primary" href="https://getquickrefund.com/request-demo">Request Free VAMP Assessment</a>
+    <p class="cta-fine">No commitment. Performance-based pricing only. Results in weeks.</p>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="site-footer">
+  <div class="container" style="padding:0">
+    <div class="footer-top">
+      <div class="footer-logo">
+        <img src="https://getquickrefund.com/quickrefund_logo.svg" alt="QuickRefund">
+      </div>
+      <div class="footer-newsletter">
+        <input type="email" placeholder="Your email for updates">
+        <button>Subscribe</button>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 – 2026 QuickRefund AI. All rights reserved.</div>
+      <div class="footer-links">
+        <a href="https://getquickrefund.com/privacy-policy">Privacy Policy</a>
+        <a href="https://getquickrefund.com/terms-of-service">Terms of Service</a>
+        <a href="https://getquickrefund.com/partner-program">Partner Program</a>
+        <a href="https://getquickrefund.com/contact">Contact Us</a>
+        <a href="https://admin.quickrefund.ai">Merchant Login</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Hamburger menu toggle
+document.querySelector('.hamburger').addEventListener('click', function() {
+  this.classList.toggle('active');
+  document.querySelector('.nav-links').classList.toggle('nav-open');
+});
+
+// Audience toggle — swaps all .content-merchant / .content-partner blocks
+document.querySelectorAll('.hero-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.hero-tab').forEach(function(t) { t.classList.remove('active'); });
+    this.classList.add('active');
+    var audience = this.dataset.audience;
+    var merchantBlocks = document.querySelectorAll('.content-merchant');
+    var partnerBlocks = document.querySelectorAll('.content-partner');
+    if (audience === 'partner') {
+      merchantBlocks.forEach(function(el) { el.style.display = 'none'; });
+      partnerBlocks.forEach(function(el) { el.style.display = 'block'; });
+    } else {
+      merchantBlocks.forEach(function(el) { el.style.display = 'block'; });
+      partnerBlocks.forEach(function(el) { el.style.display = 'none'; });
+    }
+    // Re-trigger scroll reveals for newly visible elements
+    document.querySelectorAll('.reveal:not(.revealed)').forEach(function(el) { observer.observe(el); });
+  });
+});
+
+// Scroll reveal
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('revealed');
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+</script>
+
+</body>
+</html>
