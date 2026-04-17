@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickRefund Ecosystem Map</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0b1222;
+    --navy-light: #111b2e;
+    --navy-mid: #162036;
+    --blue: #2563eb;
+    --blue-glow: rgba(37,99,235,0.35);
+    --cyan: #06b6d4;
+    --cyan-glow: rgba(6,182,212,0.3);
+    --green: #10b981;
+    --green-glow: rgba(16,185,129,0.3);
+    --amber: #f59e0b;
+    --amber-glow: rgba(245,158,11,0.25);
+    --red: #ef4444;
+    --white: #f1f5f9;
+    --gray: #94a3b8;
+    --gray-dim: #475569;
+    --card-bg: rgba(17,27,46,0.7);
+    --card-border: rgba(37,99,235,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ── Background atmosphere ── */
+  .bg-atmosphere {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .bg-atmosphere::before {
+    content: '';
+    position: absolute;
+    top: -40%; left: -20%;
+    width: 80vw; height: 80vw;
+    background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%);
+    animation: drift 25s ease-in-out infinite alternate;
+  }
+  .bg-atmosphere::after {
+    content: '';
+    position: absolute;
+    bottom: -30%; right: -10%;
+    width: 70vw; height: 70vw;
+    background: radial-gradient(circle, rgba(6,182,212,0.06) 0%, transparent 65%);
+    animation: drift 30s ease-in-out infinite alternate-reverse;  }
+  @keyframes drift {
+    0% { transform: translate(0,0) scale(1); }
+    100% { transform: translate(60px, 40px) scale(1.1); }
+  }
+
+  /* Grid overlay */
+  .grid-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-image:
+      linear-gradient(rgba(37,99,235,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(37,99,235,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  /* ── Header ── */
+  .header {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 60px 24px 20px;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 18px;
+    border-radius: 100px;    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 24px;
+  }
+  .header-badge .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { opacity: 1; box-shadow: 0 0 4px var(--green); }
+    50% { opacity: 0.4; box-shadow: 0 0 8px var(--green); }
+  }
+  .header h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    background: linear-gradient(135deg, var(--white) 0%, var(--cyan) 50%, var(--blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;    margin-bottom: 16px;
+  }
+  .header p {
+    font-size: 17px;
+    color: var(--gray);
+    max-width: 640px;
+    margin: 0 auto 32px;
+    line-height: 1.6;
+  }
+
+  /* ── Stats bar ── */
+  .stats-bar {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 0 24px 48px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);    backdrop-filter: blur(12px);
+    font-size: 13px;
+    color: var(--gray);
+    transition: all 0.3s ease;
+    cursor: default;
+  }
+  .stat-chip:hover {
+    border-color: var(--cyan);
+    background: rgba(6,182,212,0.08);
+    color: var(--white);
+    transform: translateY(-2px);
+  }
+  .stat-chip .stat-value {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--cyan);
+  }
+  .stat-chip .stat-icon {
+    font-size: 16px;
+  }
+
+  /* ── Main flow container ── */
+  .flow-container {
+    position: relative;
+    z-index: 10;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+  /* SVG flow lines */
+  .flow-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Stage cards ── */
+  .stages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 24px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .stage-card {
+    position: relative;
+    border-radius: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(16px);
+    padding: 32px;
+    transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+    cursor: default;  }
+  .stage-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--stage-color, var(--blue)), transparent);
+    opacity: 0.6;
+    transition: opacity 0.3s;
+  }
+  .stage-card:hover {
+    border-color: var(--stage-color, var(--blue));
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px -12px var(--stage-glow, var(--blue-glow));
+  }
+  .stage-card:hover::before {
+    opacity: 1;
+  }
+  .stage-card.future {
+    border-style: dashed;
+    opacity: 0.65;
+  }
+  .stage-card.future:hover {
+    opacity: 0.9;
+  }
+  .stage-card.future .coming-soon {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;    border-radius: 6px;
+    background: rgba(245,158,11,0.12);
+    color: var(--amber);
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .stage-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--stage-color, var(--blue)), rgba(37,99,235,0.3));
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 16px;
+    color: var(--white);
+  }
+
+  .stage-card h3 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;  }
+
+  .stage-subtitle {
+    font-size: 13px;
+    color: var(--stage-color, var(--cyan));
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 16px;
+  }
+
+  .stage-card p.desc {
+    font-size: 14px;
+    color: var(--gray);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  .stage-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s;
+    opacity: 0;
+  }
+  .stage-card:hover .stage-details,
+  .stage-card.expanded .stage-details {
+    max-height: 600px;
+    opacity: 1;
+  }
+
+  .detail-list {    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .detail-list li {
+    position: relative;
+    padding: 8px 0 8px 20px;
+    font-size: 13px;
+    color: var(--gray);
+    line-height: 1.5;
+    border-left: 1px solid rgba(37,99,235,0.15);
+    margin-left: 4px;
+  }
+  .detail-list li::before {
+    content: '';
+    position: absolute;
+    left: -3.5px;
+    top: 14px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--stage-color, var(--blue));
+    box-shadow: 0 0 8px var(--stage-glow, var(--blue-glow));
+  }
+
+  .stage-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;    margin-top: 12px;
+    margin-right: 6px;
+  }
+  .tag-green { background: rgba(16,185,129,0.12); color: var(--green); }
+  .tag-blue { background: rgba(37,99,235,0.12); color: var(--blue); }
+  .tag-cyan { background: rgba(6,182,212,0.12); color: var(--cyan); }
+  .tag-amber { background: rgba(245,158,11,0.12); color: var(--amber); }
+
+  .expand-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--gray-dim);
+    transition: color 0.3s;
+  }
+  .stage-card:hover .expand-hint {
+    color: var(--stage-color, var(--cyan));
+  }
+  .expand-hint svg {
+    width: 14px; height: 14px;
+    transition: transform 0.3s;
+  }
+  .stage-card:hover .expand-hint svg {
+    transform: rotate(90deg);
+  }
+
+  /* ── Feedback loop section ── */
+  .feedback-loop {    position: relative;
+    z-index: 10;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+  .feedback-card {
+    position: relative;
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(6,182,212,0.06), rgba(37,99,235,0.06));
+    border: 1px solid rgba(6,182,212,0.25);
+    padding: 48px;
+    overflow: hidden;
+  }
+  .feedback-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(6,182,212,0.08), transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(37,99,235,0.06), transparent 60%);
+    pointer-events: none;
+  }
+  .feedback-card .inner {
+    position: relative;
+    z-index: 2;
+  }
+  .feedback-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;    border-radius: 100px;
+    background: rgba(6,182,212,0.1);
+    border: 1px solid rgba(6,182,212,0.2);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 20px;
+  }
+  .feedback-card h2 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 3.5vw, 44px);
+    letter-spacing: -1px;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .feedback-card p {
+    font-size: 16px;
+    color: var(--gray);
+    line-height: 1.7;
+    max-width: 720px;
+    margin-bottom: 28px;
+  }
+  .feedback-flow {    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .flow-node {
+    padding: 14px 24px;
+    border-radius: 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s;
+    cursor: default;
+  }
+  .flow-node:hover {
+    border-color: var(--cyan);
+    box-shadow: 0 0 24px var(--cyan-glow);
+    transform: translateY(-2px);
+  }
+  .flow-arrow {
+    color: var(--cyan);
+    font-size: 20px;
+    animation: arrow-pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes arrow-pulse {
+    0%,100% { opacity: 0.4; transform: translateX(0); }
+    50% { opacity: 1; transform: translateX(4px); }
+  }
+  /* ── Animated particles on flow lines ── */
+  .particle-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 40px 24px 60px;
+    border-top: 1px solid rgba(37,99,235,0.1);
+  }
+  .footer-logo {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  .footer-logo span { color: var(--cyan); }
+  .footer p {
+    font-size: 13px;
+    color: var(--gray-dim);
+  }
+  .patent-badge {    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    border-radius: 100px;
+    border: 1px solid rgba(16,185,129,0.2);
+    background: rgba(16,185,129,0.06);
+    color: var(--green);
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 16px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .header { padding: 40px 16px 12px; }
+    .stages-grid { grid-template-columns: 1fr; gap: 16px; }
+    .feedback-card { padding: 28px 20px; }
+    .stage-card { padding: 24px; }
+    .stat-chip { padding: 8px 14px; font-size: 12px; }
+    .feedback-flow { flex-direction: column; align-items: stretch; }
+    .flow-arrow { transform: rotate(90deg); text-align: center; }
+    .stage-details { max-height: none; opacity: 1; }
+  }
+
+  /* ── Entry animations ── */
+  .stage-card, .stat-chip, .feedback-card {
+    animation: fadeUp 0.6s ease-out both;
+  }
+  .stage-card:nth-child(1) { animation-delay: 0.1s; }  .stage-card:nth-child(2) { animation-delay: 0.18s; }
+  .stage-card:nth-child(3) { animation-delay: 0.26s; }
+  .stage-card:nth-child(4) { animation-delay: 0.34s; }
+  .stage-card:nth-child(5) { animation-delay: 0.42s; }
+  .stage-card:nth-child(6) { animation-delay: 0.50s; }
+  .stage-card:nth-child(7) { animation-delay: 0.58s; }
+  .stat-chip:nth-child(1) { animation-delay: 0.05s; }
+  .stat-chip:nth-child(2) { animation-delay: 0.1s; }
+  .stat-chip:nth-child(3) { animation-delay: 0.15s; }
+  .stat-chip:nth-child(4) { animation-delay: 0.2s; }
+  .stat-chip:nth-child(5) { animation-delay: 0.25s; }
+  .stat-chip:nth-child(6) { animation-delay: 0.3s; }
+  .feedback-card { animation-delay: 0.7s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Connection lines between cards ── */
+  .flow-line-container {
+    position: relative;
+    z-index: 2;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .flow-line {    position: relative;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--line-from, var(--blue)), var(--line-to, var(--cyan)));
+    opacity: 0.3;
+  }
+  .flow-line::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--line-to, var(--cyan));
+    box-shadow: 0 0 12px var(--line-to, var(--cyan));
+    animation: line-particle 2s linear infinite;
+  }
+  @keyframes line-particle {
+    0% { top: -4px; opacity: 1; }
+    100% { top: calc(100% - 4px); opacity: 0.3; }
+  }
+
+  /* ── Horizontal flow indicator row ── */
+  .flow-row {
+    position: relative;
+    z-index: 10;
+    max-width: 1400px;
+    margin: 0 auto;    padding: 0 24px 12px;
+  }
+  .flow-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 16px 0;
+  }
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+    color: var(--gray-dim);
+    white-space: nowrap;
+  }
+  .flow-step .step-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .flow-step .step-arrow {
+    color: var(--gray-dim);
+    font-size: 14px;
+    animation: arrow-pulse 2s ease-in-out infinite;
+  }
+  /* Connection animated line between sections */
+  .section-connector {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    padding: 8px 0;
+  }
+  .connector-line {
+    width: 2px;
+    height: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .connector-line::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(37,99,235,0.4), rgba(6,182,212,0.4));
+  }
+  .connector-line .particle {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    left: -2px;
+    background: var(--cyan);
+    box-shadow: 0 0 10px var(--cyan);
+    animation: flow-down 1.8s linear infinite;
+  }  @keyframes flow-down {
+    0% { top: -6px; opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { top: calc(100% + 6px); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-atmosphere"></div>
+<div class="grid-overlay"></div>
+<canvas class="particle-canvas" id="particleCanvas"></canvas>
+
+<!-- ══════ HEADER ══════ -->
+<header class="header">
+  <div class="header-badge">
+    <span class="dot"></span>
+    Ecosystem Map
+  </div>
+  <h1>QuickRefund Lifecycle</h1>
+  <p>From transaction to trust&mdash;how QuickRefund intercepts disputes before they happen, saves merchants money, and builds a verified commerce layer.</p>
+</header>
+
+<!-- ══════ STATS BAR ══════ -->
+<div class="stats-bar">
+  <div class="stat-chip">
+    <span class="stat-icon">&#9888;&#65039;</span>
+    <span class="stat-value">84%</span>    <span>of consumers say chargebacks are easier than refunds</span>
+  </div>
+  <div class="stat-chip">
+    <span class="stat-icon">&#128176;</span>
+    <span class="stat-value">$10 vs $250</span>
+    <span>refund cost vs chargeback cost</span>
+  </div>
+  <div class="stat-chip">
+    <span class="stat-icon">&#9989;</span>
+    <span class="stat-value">Zero</span>
+    <span>VAMP ratio impact</span>
+  </div>
+  <div class="stat-chip">
+    <span class="stat-icon">&#9889;</span>
+    <span class="stat-value">5 min</span>
+    <span>setup time</span>
+  </div>
+  <div class="stat-chip">
+    <span class="stat-icon">&#128274;</span>
+    <span class="stat-value">165</span>
+    <span>patent items</span>
+  </div>
+  <div class="stat-chip">
+    <span class="stat-icon">&#128200;</span>
+    <span class="stat-value">106M</span>
+    <span>Visa disputes in 2025</span>
+  </div>
+</div>
+<!-- ══════ FLOW STEPS (HORIZONTAL BREADCRUMB) ══════ -->
+<div class="flow-row">
+  <div class="flow-steps">
+    <div class="flow-step"><span class="step-dot" style="background:var(--blue)"></span> Transaction</div>
+    <span class="flow-step step-arrow">&rarr;</span>
+    <div class="flow-step"><span class="step-dot" style="background:var(--cyan)"></span> Pre-Dispute</div>
+    <span class="flow-step step-arrow">&rarr;</span>
+    <div class="flow-step"><span class="step-dot" style="background:var(--green)"></span> Consumer</div>
+    <span class="flow-step step-arrow">&rarr;</span>
+    <div class="flow-step"><span class="step-dot" style="background:#8b5cf6"></span> Refund</div>
+    <span class="flow-step step-arrow">&rarr;</span>
+    <div class="flow-step"><span class="step-dot" style="background:var(--amber)"></span> Trust Layer</div>
+    <span class="flow-step step-arrow">&rarr;</span>
+    <div class="flow-step"><span class="step-dot" style="background:var(--red);opacity:0.5"></span> <span style="opacity:0.5">Post-Dispute</span></div>
+    <span class="flow-step step-arrow" style="opacity:0.3">&rarr;</span>
+    <div class="flow-step"><span class="step-dot" style="background:var(--cyan);opacity:0.8"></span> Intelligence</div>
+  </div>
+</div>
+
+<!-- ══════ STAGES GRID ══════ -->
+<div class="flow-container">
+  <div class="stages-grid">
+
+    <!-- STAGE 1 — TRANSACTION -->
+    <div class="stage-card" style="--stage-color: var(--blue); --stage-glow: var(--blue-glow);">
+      <div class="stage-number">1</div>
+      <div class="stage-subtitle">Gateway Integration</div>
+      <h3>Transaction</h3>
+      <p class="desc">Consumer makes a purchase. The transaction flows through the merchant's payment gateway&mdash;and QuickRefund connects server-to-server at the gateway level.</p>      <div class="expand-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        Hover for details
+      </div>
+      <div class="stage-details">
+        <ul class="detail-list">
+          <li>Consumer purchases from merchant storefront</li>
+          <li>Transaction routes through gateway (NMI, Authorize.net, Stripe, etc.)</li>
+          <li>QuickRefund connects server-to-server at the gateway level</li>
+          <li>Transaction data captured: amount, descriptor, card BIN, timestamp</li>
+          <li>No consumer-facing changes&mdash;invisible integration</li>
+        </ul>
+        <span class="stage-tag tag-blue">Server-to-Server</span>
+        <span class="stage-tag tag-green">5-min Setup</span>
+      </div>
+    </div>
+
+    <!-- STAGE 2 — PRE-DISPUTE OUTREACH -->
+    <div class="stage-card" style="--stage-color: var(--cyan); --stage-glow: var(--cyan-glow);">
+      <div class="stage-number">2</div>
+      <div class="stage-subtitle">QuickRefund Core</div>
+      <h3>Pre-Dispute Outreach</h3>
+      <p class="desc">QuickRefund proactively reaches the consumer with branded communications before they ever think about calling their bank.</p>
+      <div class="expand-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        Hover for details
+      </div>
+      <div class="stage-details">
+        <ul class="detail-list">          <li>Branded email notification with merchant logo</li>
+          <li>SMS notification with direct refund link</li>
+          <li>QR Code&mdash;scannable link to refund page</li>
+          <li>Trust Badge visible at checkout prevents disputes upfront</li>
+          <li>Consumer receives one-click refund link</li>
+          <li>Fully configurable: timing, thresholds, messaging, per-card limits</li>
+        </ul>
+        <span class="stage-tag tag-cyan">Email</span>
+        <span class="stage-tag tag-cyan">SMS</span>
+        <span class="stage-tag tag-cyan">QR Code</span>
+        <span class="stage-tag tag-green">Trust Badge</span>
+      </div>
+    </div>
+
+    <!-- STAGE 3 — CONSUMER INTERACTION -->
+    <div class="stage-card" style="--stage-color: var(--green); --stage-glow: var(--green-glow);">
+      <div class="stage-number">3</div>
+      <div class="stage-subtitle">AI-Powered Resolution</div>
+      <h3>Consumer Interaction</h3>
+      <p class="desc">The consumer lands on an AI-powered chat that helps them recognize the charge or request a one-click refund&mdash;no phone trees, no bank calls.</p>
+      <div class="expand-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        Hover for details
+      </div>
+      <div class="stage-details">
+        <ul class="detail-list">
+          <li><strong>QR Chat:</strong> AI helps consumer identify the charge (descriptor confusion)</li>
+          <li>If consumer recognizes charge &rarr; dispute avoided, no action needed</li>
+          <li>If consumer wants refund &rarr; one-click refund request submitted</li>          <li>If consumer does nothing &rarr; link expires gracefully</li>
+          <li>Branded experience: merchant logo, colors, messaging</li>
+        </ul>
+        <span class="stage-tag tag-green">AI Chat</span>
+        <span class="stage-tag tag-blue">One-Click</span>
+      </div>
+    </div>
+
+    <!-- STAGE 4 — REFUND EXECUTION -->
+    <div class="stage-card" style="--stage-color: #8b5cf6; --stage-glow: rgba(139,92,246,0.3);">
+      <div class="stage-number">4</div>
+      <div class="stage-subtitle">Automated Processing</div>
+      <h3>Refund Execution</h3>
+      <p class="desc">Merchant approves (or auto-approves) and QuickRefund executes the refund server-to-server against the original transaction. Clean, auditable, VAMP-safe.</p>
+      <div class="expand-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        Hover for details
+      </div>
+      <div class="stage-details">
+        <ul class="detail-list">
+          <li>Merchant reviews and approves (or auto-approve via rules)</li>
+          <li>Refund executed server-to-server against original transaction ID</li>
+          <li>Back to original payment method</li>
+          <li>One refund per transaction&mdash;idempotent execution</li>
+          <li>Full audit trail logged for compliance</li>
+          <li><strong>VAMP ratio: UNAFFECTED</strong>&mdash;no TC40, no TC15 filed</li>
+        </ul>
+        <span class="stage-tag tag-green">Zero VAMP Impact</span>
+        <span class="stage-tag tag-blue">Idempotent</span>        <span class="stage-tag tag-cyan">Full Audit Trail</span>
+      </div>
+    </div>
+
+    <!-- STAGE 5 — MARKETPLACE & TRUST -->
+    <div class="stage-card" style="--stage-color: var(--amber); --stage-glow: var(--amber-glow);">
+      <div class="stage-number">5</div>
+      <div class="stage-subtitle">Commerce Trust Layer</div>
+      <h3>Marketplace &amp; Trust</h3>
+      <p class="desc">Verified merchants earn trust tiers and get listed in the QuickRefund marketplace&mdash;building consumer confidence with machine-readable credentials.</p>
+      <div class="expand-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        Hover for details
+      </div>
+      <div class="stage-details">
+        <ul class="detail-list">
+          <li>QuickRefund-verified merchants listed in marketplace</li>
+          <li>Trust Badge tiers: Bronze &rarr; Silver &rarr; Gold</li>
+          <li>Machine-readable trust credentials for AI agents</li>
+          <li>Consumer-facing verification and trust signals</li>
+          <li>"Powered by QuickRefund" badge on merchant sites</li>
+        </ul>
+        <span class="stage-tag tag-amber">Bronze</span>
+        <span class="stage-tag tag-amber">Silver</span>
+        <span class="stage-tag tag-amber">Gold</span>
+      </div>
+    </div>
+    <!-- STAGE 6 — POST-DISPUTE (FUTURE) -->
+    <div class="stage-card future" style="--stage-color: var(--red); --stage-glow: rgba(239,68,68,0.2);">
+      <div class="coming-soon">&#128679; Coming Soon</div>
+      <div class="stage-number" style="opacity:0.6">6</div>
+      <div class="stage-subtitle">Alert Interception</div>
+      <h3>Post-Dispute Layer</h3>
+      <p class="desc">If a consumer still goes to their bank despite outreach, QuickRefund catches the alert and resolves it automatically&mdash;at a fraction of the cost.</p>
+      <div class="expand-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        Hover for details
+      </div>
+      <div class="stage-details">
+        <ul class="detail-list">
+          <li>TC40 (fraud alert) or TC15 (dispute) filed by consumer's bank</li>
+          <li>QuickRefund receives Ethoca alerts (Mastercard)</li>
+          <li>Verifi CDRN/RDR alerts (Visa)</li>
+          <li>Alert matched to original transaction via CRM data</li>
+          <li>Automated refund through existing gateway infrastructure</li>
+          <li><strong>Alert cost: $15&ndash;$25</strong> vs chargeback cost: <strong>$100&ndash;$250</strong></li>
+        </ul>
+        <span class="stage-tag tag-amber">Ethoca</span>
+        <span class="stage-tag tag-amber">Verifi CDRN</span>
+        <span class="stage-tag tag-amber">RDR</span>
+      </div>
+    </div>
+    <!-- STAGE 7 — INTELLIGENCE FEEDBACK LOOP -->
+    <div class="stage-card" style="--stage-color: var(--cyan); --stage-glow: var(--cyan-glow);">
+      <div class="stage-number">7</div>
+      <div class="stage-subtitle">Continuous Learning</div>
+      <h3>Intelligence Loop</h3>
+      <p class="desc">Post-dispute data feeds back into the outreach engine&mdash;making QuickRefund smarter about which transactions to target proactively.</p>
+      <div class="expand-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        Hover for details
+      </div>
+      <div class="stage-details">
+        <ul class="detail-list">
+          <li>Identifies which transaction types generate the most disputes</li>
+          <li>BIN-level analysis: which card issuers file most disputes</li>
+          <li>Affiliate and merchant-level dispute intelligence</li>
+          <li>Feeds back into outreach engine for smarter targeting</li>
+          <li>Visa Dispute Intelligence data sharing (future)</li>
+          <li>CE 3.0 evidence auto-populated for disputes that slip through</li>
+        </ul>
+        <span class="stage-tag tag-cyan">BIN Analysis</span>
+        <span class="stage-tag tag-green">Smart Targeting</span>
+        <span class="stage-tag tag-blue">CE 3.0</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- ══════ FEEDBACK LOOP HERO ══════ -->
+<div class="feedback-loop">
+  <div class="feedback-card">
+    <div class="inner">
+      <div class="feedback-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+        The "Aha" Moment
+      </div>
+      <h2>The Intelligence<br>Feedback Loop</h2>
+      <p>Every dispute that slips through makes QuickRefund smarter. Post-dispute data reveals which transaction types, BINs, affiliates, and merchants generate the most chargebacks&mdash;and that intelligence flows directly back into the pre-dispute outreach engine. The system gets better every day.</p>
+      <div class="feedback-flow">
+        <div class="flow-node" style="border-color: rgba(239,68,68,0.3);">Post-Dispute Data</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-node" style="border-color: rgba(6,182,212,0.3);">Pattern Analysis</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-node" style="border-color: rgba(37,99,235,0.3);">Risk Scoring</div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-node" style="border-color: rgba(16,185,129,0.3);">Smarter Outreach</div>
+        <span class="flow-arrow" style="animation-delay: 0.3s;">&rarr;</span>
+        <div class="flow-node" style="border-color: rgba(6,182,212,0.4); color: var(--cyan);">Fewer Disputes</div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ══════ FOOTER ══════ -->
+<footer class="footer">
+  <div class="footer-logo">Quick<span>Refund</span></div>
+  <p>Pre-dispute resolution &bull; Merchant trust layer &bull; Intelligence engine</p>
+  <div class="patent-badge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    165 Patent Items &bull; Protected Innovation
+  </div>
+</footer>
+
+<!-- ══════ PARTICLE ANIMATION ══════ -->
+<script>
+(function() {
+  const canvas = document.getElementById('particleCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, particles = [];
+  const COLORS = ['rgba(37,99,235,0.3)', 'rgba(6,182,212,0.25)', 'rgba(16,185,129,0.2)'];
+  const COUNT = 40;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = document.documentElement.scrollHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  class Particle {
+    constructor() { this.reset(); }
+    reset() {      this.x = Math.random() * w;
+      this.y = Math.random() * h;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = (Math.random() - 0.5) * 0.3;
+      this.r = Math.random() * 2 + 0.5;
+      this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      this.life = Math.random() * 200 + 100;
+      this.age = 0;
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.age++;
+      if (this.age > this.life || this.x < 0 || this.x > w || this.y < 0 || this.y > h) this.reset();
+    }
+    draw() {
+      const alpha = 1 - (this.age / this.life);
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = this.color.replace(/[\d.]+\)$/, (alpha * 0.5).toFixed(2) + ')');
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < COUNT; i++) particles.push(new Particle());
+
+  // Draw connections
+  function drawConnections() {
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 150) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(37,99,235,${(1 - dist / 150) * 0.06})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, w, h);
+    particles.forEach(p => { p.update(); p.draw(); });
+    drawConnections();
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  // Resize canvas when page height changes (for scroll)
+  const ro = new ResizeObserver(() => {
+    canvas.height = document.documentElement.scrollHeight;
+    h = canvas.height;
+  });
+  ro.observe(document.body);
+})();</script>
+
+<footer style="position:relative;z-index:2;text-align:center;padding:2.5rem 1rem 2rem;font-family:'DM Sans',sans-serif;font-size:.85rem;border-top:1px solid rgba(255,255,255,0.06);margin-top:2rem;">
+  <a href="/" style="color:#94a3b8;text-decoration:none;letter-spacing:.02em;" onmouseover="this.style.color='#06b6d4'" onmouseout="this.style.color='#94a3b8'">&larr; refundwin.com</a>
+</footer>
+
+</body>
+</html>
